@@ -18,7 +18,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY start.sh /usr/local/bin
 RUN chmod 744 /usr/local/bin/start.sh
 
-COPY freeradius-build-config/clients.conf /etc/freeradius/3.0
+COPY supervisord.conf /etc
 
 RUN mkdir /home/runuser && \
     groupadd --gid 1000 runuser && \
@@ -29,19 +29,6 @@ ENV CERTDIR=/etc/freeradius/3.0/certs
 
 RUN sed -i '1s/^/testing\tCleartext-Password := "password"\n/' /etc/freeradius/3.0/mods-config/files/authorize
 
-RUN echo \
-'[supervisord]\n\
-nodaemon=true\n\
-pidfile=/tmp/supervisord.pid\n\
-logfile=/dev/fd/1\n\
-logfile_maxbytes=0\n\n\
-[program:freeradius]\n\
-priority=1\n\
-command=/usr/sbin/freeradius -X\n\
-autorestart=true\n\
-stdout_logfile=/dev/fd/1\n\
-stdout_logfile_maxbytes=0\n\
-redirect_stderr=true\n' \
-> /etc/supervisord.conf
+RUN sed -i '1s/^/client any_client {\n\tipaddr = 0.0.0.0\/0\n\tsecret = testing123\n}\n/' /etc/freeradius/3.0/clients.conf
 
 CMD ["/usr/local/bin/start.sh"]
