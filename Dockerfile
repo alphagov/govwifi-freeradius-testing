@@ -16,9 +16,12 @@ ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 COPY start.sh /usr/local/bin
-RUN chmod 744 /usr/local/bin/start.sh
+RUN chmod 755 /usr/local/bin/start.sh
 
 COPY supervisord.conf /etc
+
+COPY config_watch.py /usr/local/bin
+RUN chmod 755 /usr/local/bin/config_watch.py
 
 RUN pip3 install watchdog==2.1.9
 
