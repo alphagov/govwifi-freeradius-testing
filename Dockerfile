@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends supervisor gosu nano wget curl openssh-client rsync ca-certificates zip unzip && \
+    apt-get install -y --no-install-recommends supervisor gosu nano wget curl openssh-client rsync ca-certificates python3-pip zip unzip && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists
@@ -19,6 +19,8 @@ COPY start.sh /usr/local/bin
 RUN chmod 744 /usr/local/bin/start.sh
 
 COPY supervisord.conf /etc
+
+RUN pip3 install watchdog==2.1.9
 
 RUN mkdir /home/runuser && \
     groupadd --gid 1000 runuser && \
