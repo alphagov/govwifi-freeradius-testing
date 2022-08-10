@@ -7,13 +7,29 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists
 
 RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wpasupplicant freeradius freeradius-rest freeradius-utils freeradius-config openssl make && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wpasupplicant freeradius freeradius-rest freeradius-utils freeradius-config openssl && \
+    apt-get clean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential git libssl-dev autoconf automake libtool pkg-config zlib1g zlib1g-dev && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists
 
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN git -c advice.detachedHead=false clone https://github.com/facebook/watchman.git -b v2022.08.08.00 --depth 1 /watchman
+WORKDIR /watchman
+RUN ./autogen.sh && \
+    ./configure.sh --without-python --without-pcre && \
+    make && \
+    make install
 
 COPY start.sh /usr/local/bin
 RUN chmod 744 /usr/local/bin/start.sh
