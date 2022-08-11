@@ -18,12 +18,12 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY start.sh /usr/local/bin
 RUN chmod 755 /usr/local/bin/start.sh
 
-COPY supervisord.conf /etc
+RUN pip3 install watchdog==2.1.9
 
 COPY config_watch.py /usr/local/bin
 RUN chmod 755 /usr/local/bin/config_watch.py
 
-RUN pip3 install watchdog==2.1.9
+COPY supervisord.conf /etc
 
 RUN mkdir /home/runuser && \
     groupadd --gid 1000 runuser && \

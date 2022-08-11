@@ -13,4 +13,4 @@ chown -R runuser:runuser /etc/ssl/private/
 
 #exec gosu runuser /usr/sbin/freeradius -X
 
-exec gosu runuser supervisord
+exec supervisord

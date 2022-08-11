@@ -47,7 +47,7 @@ class ConfigChangeHandler(FileSystemEventHandler):
         if is_valid_event(event):
             print('Config change detected: {0} was {1}'.format(event.src_path, event.event_type))
             print('Restarting server')
-            os.popen(RUN_ON_CHANGE)
+            # os.popen(RUN_ON_CHANGE)
 
 
 if __name__ == '__main__':
