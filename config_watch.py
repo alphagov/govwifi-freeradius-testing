@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 
 import os
-import subprocess
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 WATCH_DIR = '/etc/freeradius/3.0'
-WATCH_DIR_TEST = '/home/jimnarey/projects/govwifi/test_dir'
 TRIGGER_EVENTS = ('modified', 'deleted', 'moved')
 IGNORE_EXTS = ('.swp')
 IGNORE_SUBDIRS = ('.idea', '.vscode')
-RUN_ON_CHANGE = 'supervisorctl restart freeradius'
-RUN_ON_CHANGE_TEST = 'ls -la .'
 
 
 def get_ext(path):
@@ -47,7 +43,9 @@ class ConfigChangeHandler(FileSystemEventHandler):
         if is_valid_event(event):
             print('Config change detected: {0} was {1}'.format(event.src_path, event.event_type))
             print('Restarting server')
-            # os.popen(RUN_ON_CHANGE)
+            with open('/tmp/supervisord.pid', 'r') as pidfile:
+                pid = pidfile.readline().strip()
+            os.popen('kill -1 {}'.format(pid))
 
 
 if __name__ == '__main__':
