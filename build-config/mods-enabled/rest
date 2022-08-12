@@ -1,0 +1,36 @@
+rest {
+    tls {
+        verify_cert = no
+        verify_cert_cn = no
+    }
+
+    authorize {
+      noop
+    }
+
+    authenticate {
+      noop
+    }
+
+    accounting {
+      noop
+    }
+
+    post-auth {
+        uri = "127.0.0.1"
+        method = 'post'
+        data = "{ \"test\": \"data\"}"
+        body = 'json'
+    }
+
+    pool {
+		start = ${thread[pool].start_servers}
+		min = ${thread[pool].min_spare_servers}
+		max = ${thread[pool].max_servers}
+		spare = ${thread[pool].max_spare_servers}
+		uses = 0
+		lifetime = 0
+		idle_timeout = 60
+
+	}
+}
