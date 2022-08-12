@@ -25,15 +25,17 @@ RUN chmod 755 /usr/local/bin/config_watch.py
 
 COPY supervisord.conf /etc
 
+COPY build-config/ /etc/freeradius/3.0/
+
 RUN mkdir /home/runuser && \
     groupadd --gid 1000 runuser && \
     useradd --home-dir /home/runuser --shell /bin/bash --uid 1000 --gid 1000 runuser && \
     chown -R runuser:runuser /home/runuser
 
-ENV CERTDIR=/etc/freeradius/3.0/certs
+ENV certdir=/etc/freeradius/3.0/certs
 
-RUN sed -i '1s/^/testing\tCleartext-Password := "password"\n/' /etc/freeradius/3.0/mods-config/files/authorize
+# RUN sed -i '1s/^/testing\tCleartext-Password := "password"\n/' /etc/freeradius/3.0/mods-config/files/authorize
 
-RUN sed -i '1s/^/client any_client {\n\tipaddr = 0.0.0.0\/0\n\tsecret = testing123\n}\n/' /etc/freeradius/3.0/clients.conf
+# RUN sed -i '1s/^/client any_client {\n\tipaddr = 0.0.0.0\/0\n\tsecret = testing123\n}\n/' /etc/freeradius/3.0/clients.conf
 
 CMD ["/usr/local/bin/start.sh"]
