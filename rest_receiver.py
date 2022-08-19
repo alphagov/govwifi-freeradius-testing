@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import simplejson
+import json
 
 HOST_NAME = "localhost"
 PORT = 8081
@@ -10,7 +10,7 @@ PORT = 8081
 def print_request_data(data_string):
     print('*'*60)
     print('Data String: {}'.format(data_string.decode('utf-8')))
-    print('Data JSON: {}'.format(simplejson.loads(data_string)))
+    print('Data JSON: {}'.format(json.loads(data_string)))
 
 
 class RestReceiver(BaseHTTPRequestHandler):
