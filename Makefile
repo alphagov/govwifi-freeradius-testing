@@ -1,5 +1,5 @@
 build:
-	docker build -t freeradius-3-ubuntu .
+	docker build -t freeradius-3-ubuntu freeradius-server/
 
 reset-config:
 	rm -rf freeradius-config

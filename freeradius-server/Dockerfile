@@ -1,13 +1,13 @@
 FROM ubuntu:20.04
 
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends supervisor gosu nano wget curl openssh-client ca-certificates python3-pip && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu nano curl ca-certificates freeradius openssl iproute2 && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists
 
 RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wpasupplicant freeradius freeradius-rest freeradius-utils freeradius-config openssl iproute2 && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends supervisor python3-pip freeradius-rest freeradius-config  && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists
