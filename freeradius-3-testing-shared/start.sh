@@ -11,4 +11,4 @@ chown runuser:runuser /dev/stdout
 chown -R runuser:runuser /etc/freeradius
 chown -R runuser:runuser /etc/ssl/private/
 
-exec env HOST_IP="$(/sbin/ip route | awk '/default/ { print $3 }')" gosu runuser /bin/bash
+HOST_IP="$(/sbin/ip route | awk '/default/ { print $3 }')"
