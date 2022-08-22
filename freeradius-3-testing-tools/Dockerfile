@@ -7,9 +7,13 @@ RUN apt-get update -y && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists
 
-RUN git clone --depth 1 --single-branch --branch v3.2.x https://github.com/FreeRADIUS/freeradius-server.git
-RUN /freeradius-server/scripts/ci/eapol_test-build.sh
-RUN cp /freeradius-server/scripts/ci/eapol_test/eapol_test /usr/local/bin/
+RUN git clone --depth 1 --single-branch --branch v3.2.x https://github.com/FreeRADIUS/freeradius-server.git && \
+    /freeradius-server/scripts/ci/eapol_test-build.sh && \
+    cp /freeradius-server/scripts/ci/eapol_test/eapol_test /usr/local/bin/
 
-RUN echo '\nexec env HOST_IP=$HOST_IP gosu runuser /bin/bash' >> /usr/local/bin/start.sh
+COPY eapol_configs /eapol_configs
+RUN chown -R runuser:runuser /eapol_configs
+
+RUN echo '\nchown -R runuser:runuser /eapol_configs' >> /usr/local/bin/start.sh && \
+    echo 'exec env HOST_IP=$HOST_IP gosu runuser /bin/bash' >> /usr/local/bin/start.sh
 

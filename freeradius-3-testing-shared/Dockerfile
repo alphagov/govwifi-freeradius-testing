@@ -17,4 +17,7 @@ RUN mkdir /home/runuser && \
 COPY start.sh /usr/local/bin
 RUN chmod 755 /usr/local/bin/start.sh
 
+RUN chmod +x /etc/freeradius/3.0/certs/bootstrap && \
+    /etc/freeradius/3.0/certs/bootstrap
+
 CMD ["/usr/local/bin/start.sh"]

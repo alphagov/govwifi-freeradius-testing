@@ -11,5 +11,5 @@ server-start:
 	docker run --rm -t -v=$(CURDIR)/freeradius-config:/etc/freeradius/3.0 -p 1812-1813:1812-1813/udp -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) --name=freeradius-3-testing-server-c freeradius-3-testing-server
 
 tools-start:
-	docker run --rm -i -t -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) --name=freeradius-3-testing-tools-c freeradius-3-testing-tools
+	docker run --rm -i -t -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) -v=$(CURDIR)/eapol_configs:/home/runuser/eapol_configs --name=freeradius-3-testing-tools-c freeradius-3-testing-tools
  
