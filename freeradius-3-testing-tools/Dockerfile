@@ -9,11 +9,17 @@ RUN apt-get update -y && \
 
 RUN git clone --depth 1 --single-branch --branch v3.2.x https://github.com/FreeRADIUS/freeradius-server.git && \
     /freeradius-server/scripts/ci/eapol_test-build.sh && \
-    cp /freeradius-server/scripts/ci/eapol_test/eapol_test /usr/local/bin/
+    cp /freeradius-server/scripts/ci/eapol_test/eapol_test /usr/local/bin/ && \
+    rm -rf /freeradius-server
 
-COPY eapol_configs /eapol_configs
-RUN chown -R runuser:runuser /eapol_configs
+COPY build-eapol-configs /eapol-configs
+RUN chown -R runuser:runuser /eapol-configs
 
-RUN echo '\nchown -R runuser:runuser /eapol_configs' >> /usr/local/bin/start.sh && \
+# COPY build-config/ /etc/freeradius/3.0/
+
+# RUN chmod +x /etc/freeradius/3.0/certs/bootstrap && \
+#     /etc/freeradius/3.0/certs/bootstrap
+
+RUN echo '\nchown -R runuser:runuser /eapol-configs' >> /usr/local/bin/start.sh && \
     echo 'exec env HOST_IP=$HOST_IP gosu runuser /bin/bash' >> /usr/local/bin/start.sh
 

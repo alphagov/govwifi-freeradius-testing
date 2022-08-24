@@ -13,8 +13,16 @@ RUN chmod 755 /usr/local/bin/config_watch.py
 
 COPY supervisord.conf /etc
 
-COPY build-config/ /etc/freeradius/3.0/
+COPY build-freeradius-config/ /etc/freeradius/3.0/
+
+# RUN chmod +x /etc/freeradius/3.0/certs/bootstrap && \
+#     /etc/freeradius/3.0/certs/bootstrap
 
 ENV certdir=/etc/freeradius/3.0/certs
 
 RUN echo '\nexec env HOST_IP=$HOST_IP gosu runuser supervisord' >> /usr/local/bin/start.sh
+
+# TODO: add separate certs config files, using same build-config folder structure in
+# both images. Run bootstrap in each of the server and tools images.
+
+# Delete the FreeRADIUS source after compilation. Use the Ubuntu version for certs.

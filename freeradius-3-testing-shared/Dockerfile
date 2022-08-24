@@ -17,6 +17,7 @@ RUN mkdir /home/runuser && \
 COPY start.sh /usr/local/bin
 RUN chmod 755 /usr/local/bin/start.sh
 
+COPY build-freeradius-config/ /etc/freeradius/3.0/
 RUN chmod +x /etc/freeradius/3.0/certs/bootstrap && \
     /etc/freeradius/3.0/certs/bootstrap
 
