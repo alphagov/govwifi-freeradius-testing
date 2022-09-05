@@ -1,8 +1,9 @@
 FROM ubuntu:20.04
 
 RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu nano curl ca-certificates freeradius openssl iproute2 \
-    supervisor python3-pip freeradius-rest freeradius-config git build-essential libssl-dev devscripts pkg-config libnl-3-dev libnl-genl-3-dev && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gosu nano curl ca-certificates \
+    freeradius freeradius-rest freeradius-config freeradius-utils openssl iproute2 \
+    supervisor python3-pip git build-essential libssl-dev devscripts pkg-config libnl-3-dev libnl-genl-3-dev && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists
@@ -12,8 +13,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN mkdir /home/runuser && \
     groupadd --gid 1000 runuser && \
-    useradd --home-dir /home/runuser --shell /bin/bash --uid 1000 --gid 1000 runuser && \
-    chown -R runuser:runuser /home/runuser
+    useradd --home-dir /home/runuser --shell /bin/bash --uid 1000 --gid 1000 runuser
+    
+COPY .bashrc /home/runuser
+RUN  chown -R runuser:runuser /home/runuser
+VOLUME /home/runuser
 
 RUN git clone --depth 1 --single-branch --branch v3.2.x https://github.com/FreeRADIUS/freeradius-server.git && \
     /freeradius-server/scripts/ci/eapol_test-build.sh && \
