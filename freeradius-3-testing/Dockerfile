@@ -30,13 +30,15 @@ RUN chmod +x /etc/freeradius/3.0/certs/bootstrap && \
 
 COPY config_watch.py /usr/local/bin
 RUN chmod 755 /usr/local/bin/config_watch.py
+RUN pip3 install watchdog==2.1.9
 
 COPY supervisord.conf /etc
 
-RUN pip3 install watchdog==2.1.9
-
 COPY start.sh /usr/local/bin
 RUN chmod 755 /usr/local/bin/start.sh
+
+COPY log_listener.py /usr/local/bin
+RUN chmod 755 /usr/local/bin/log_listener.py
 
 COPY build-configs/eapol-test /etc/freeradius/3.0/eapol-test
 

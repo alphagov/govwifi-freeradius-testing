@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
 HOST_NAME = "localhost"
-PORT = 8081
+PORT = 80
 
 
 def print_request_data(data_string):

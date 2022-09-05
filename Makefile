@@ -12,4 +12,6 @@ start:
 
 shell:
 	docker exec -it -u runuser freeradius-3-testing-c /bin/bash
- 
+
+listen:
+	docker exec -it -u runuser freeradius-3-testing-c /usr/local/bin/log_listener.py
