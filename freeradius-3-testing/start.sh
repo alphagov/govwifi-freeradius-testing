@@ -12,3 +12,5 @@ chown -R runuser:runuser /etc/freeradius
 chown -R runuser:runuser /etc/ssl/private/
 
 HOST_IP="$(/sbin/ip route | awk '/default/ { print $3 }')"
+
+exec env HOST_IP=$HOST_IP gosu runuser supervisord

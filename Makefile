@@ -1,19 +1,15 @@
 build:
-	docker build -t freeradius-3-testing-shared freeradius-3-testing-shared/
-	docker build -t freeradius-3-testing-server freeradius-3-testing-server/
-	docker build -t freeradius-3-testing-tools freeradius-3-testing-tools/
+	docker build -t freeradius-3-testing freeradius-3-testing/
 
-reset-config-server:
-	rm -rf freeradius-config
-	docker run --rm -it -v=$(CURDIR):/host -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) freeradius-3-testing-server sh -c 'cp -r /etc/freeradius/3.0 /host/freeradius-config && chown -R $$USERID:$$GROUPID /host/freeradius-config'
+copy-configs:
+	rm -rf mounts/*
+	touch mounts/.keep
+	docker run --rm -it -v=$(CURDIR):/host -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) freeradius-3-testing sh -c 'cp -r /etc/freeradius/3.0 /host/mounts/freeradius-config && chown -R $$USERID:$$GROUPID /host/mounts/freeradius-config'
+	docker run --rm -it -v=$(CURDIR):/host -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) freeradius-3-testing sh -c 'cp -r /etc/freeradius/3.0/eapol-test /host/mounts/eapol-test-configs && chown -R $$USERID:$$GROUPID /host/mounts/eapol-test-configs'
 
-reset-config-tools:
-	rm -rf eapol-configs
-	docker run --rm -it -v=$(CURDIR):/host -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) freeradius-3-testing-tools sh -c 'cp -r /eapol-configs /host/eapol-configs && chown -R $$USERID:$$GROUPID /host/eapol-configs'
-	
-start-server:
-	docker run --rm -t -v=$(CURDIR)/freeradius-config:/etc/freeradius/3.0 -p 1812-1813:1812-1813/udp -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) --name=freeradius-3-testing-server-c freeradius-3-testing-server
+start:
+	docker run --rm -t -v=$(CURDIR)/mounts/freeradius-config:/etc/freeradius/3.0 -v=$(CURDIR)/mounts/eapol-test-configs:/etc/freeradius/eapol-test -p 1812-1813:1812-1813/udp -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) --name=freeradius-3-testing-c freeradius-3-testing
 
-start-tools:
-	docker run --rm -i -t -v=$(CURDIR)/eapol-configs:/eapol-configs -e USERID=$(shell id -u) -e GROUPID=$(shell id -g) --name=freeradius-3-testing-tools-c freeradius-3-testing-tools
+shell:
+	docker exec -it -u runuser freeradius-3-testing-c /bin/bash
  
