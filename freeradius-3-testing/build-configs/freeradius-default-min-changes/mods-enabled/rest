@@ -17,9 +17,12 @@ rest {
     }
 
     post-auth {
-        uri = "127.0.0.1"
+        uri = "http://127.0.0.1/"
         method = 'post'
-        data = "{ \"test\": \"data\"}"
+        data = "{ \
+          \"user_name\": \"%{User-Name}\", \
+          \"site_ip_address\": \"%{Client-IP-Address}\" \
+        }"
         body = 'json'
     }
 

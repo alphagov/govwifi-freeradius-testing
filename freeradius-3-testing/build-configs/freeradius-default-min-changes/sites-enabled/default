@@ -1,4 +1,3 @@
-
 server default {
 
 listen {
@@ -169,6 +168,8 @@ post-auth {
 	Post-Auth-Type Challenge {
 
 	}
+
+	debug_all
 
 }
 
