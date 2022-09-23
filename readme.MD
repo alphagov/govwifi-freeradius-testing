@@ -2,49 +2,56 @@
 
 ### Purpose
 
-To setup a free-standing FreeRADIUS server (and optionally a hardware access point) to enable risk-free config testing on a LAN/localhost. 
+To setup a free-standing FreeRADIUS server (and optionally a hardware access point) to enable risk-free config testing on a LAN/localhost.
 This readme assumes as little technical knowledge as possibe.
 
 ### Requirements
 
 
-- A Linux or MacOS machine with a working Docker installation. If using a Mac, [homebrew](https://brew.sh/) is required to install radtest.
+- A Linux or MacOS machine with a working Docker installation.
 
-- A home LAN. A standard router with at least one free ethernet port is sufficient.
+- A router or network hub/switch if testing with a hardware access point, in addition to either a separate access point or Raspberry Pi. Neither of these are needed if simply testing on the command line.
 
-- An access point, in addition to any router providing your Internet connection, which supports WPA Enterprise / 802.1X WiFi authentication. This was tested with a Netgear DGN2000 which does. An old Sky Hub I checked did not.
+- Make
 
 
 ## Building
 
-```
-git clone https://github.com/jimnarey/freeradius_testing
-```
-
-...or using ssh:
-
-```
-git@github.com:jimnarey/freeradius_testing.git
-```
+Clone the repository.
 
 From within the cloned directory:
 
 ```
-rm -rf freeradius-config && docker build -t freeradius-3-ubuntu .
+make build
 ```
 
 To extract the config directory from within the container:
 
 ```
-docker run --rm -it -v=$(pwd):/host  freeradius-3-ubuntu cp -r /etc/freeradius/3.0 /host/freeradius-config && sudo chown -R $UID:$GID freeradius-config
-
+make copy-configs
 ```
 
 ## Running
 
+To start the FreeRADIUS server:
+
 ```
-docker run --rm -t -v=$(pwd)/freeradius-config:/etc/freeradius/3.0 -p 1812-1813:1812-1813/udp -e USERID=$UID -e GROUPID=$GID freeradius-3-ubuntu
+make start
 ```
+
+To use radtest/eapol_test, in a separate terminal window:
+
+```
+make shell
+```
+
+To view the output of the REST module in a simple HTTP server, in a third terminal window:
+
+```
+make listen
+```
+
+Note that the shell and HTTP server run in the same container as the FreeRADIUS server. This makes the eapol_test and radtest easy to work with but means if the server hits an unrecoverable error *all* of the commands above will have to be run again in their respective windows.
 
 ## Notes on the default config
 
@@ -58,44 +65,43 @@ In most cases the server daemon is called `radiusd` and the config files can be 
 For these reasons the Dockerfile looks a bit inconsistent with most of the online documentation (it uses v3.0, on Ubuntu).
 
 The Dockerfile configures the FreeRADIUS server to accept connections from **ANY** IP address. This makes life easy for testing but it should go without saying is not
-something to reproduce otherwise.  
+something to reproduce otherwise.
 
-## Testing with radtest
+## Changing the configuration
 
-Radtest is a command line tool for testing authentication with a running RADIUS (including FreeRADIUS) server.
+When you run `make copy-configs` the configuration files for FreeRADIUS and eapol_test are copied out of the container into the `mounts` directory. These are then mounted when the container is started using `make start`.
 
-Install on Mac with:
+The container watches for changes to the FreeRADIUS config and will restart the server when a change is detected. Occasionally, given a bad enough config change, the server will stall when it errors and not restart properly. If this happens, use Ctrl-C in the server window to exit the container and re-run each of the commands in the 'Running' section above.
 
-```
-brew install freeradius-server
-```
+The configuration files for eapol_test can also be changed from within the mounts directory.
 
-Install on Debian/Ubuntu with:
+You can reset the configuration to the defaults at any time by running `make copy-configs` again.
 
-```
-sudo apt-get install freeradius-utils
-```
+To change the configuration which *the Docker image is built with* amend, add or delete files in the freeradius-3-testing/build-configs directory rather than the mounts directory.
 
-Using the default configuration created by FreeRADIUS/the Dockerfile, you can generate an 'Access-Accept' response with the following command:
+FreeRADIUS configuration files contain a large number of (very helpful) comments. These can make editing the files difficult, however. To clear all the comments in a file use the `pruneconfig.sh` script, passing it one or more config files.
 
-```
-radtest testing password localhost 0 testing123
+## Testing with radtest and eapol_test
 
-```
+Run the `make shell` command as above to see a list of sample radtest/eapol_test commands for testing the running server.
 
-## Testing with a Rasberry Pi access point
+Three config files for eapol_test are provided for, respectively, EAP-MSCHAPv2/PEAPv0, EAP-TTLS, EAP-TLS.
 
-Tested on a Raspberry Pi 4, which has built in Wifi as well as an ethernet port. I was unable to get this working using an original Raspberry Pi, without ethernet port, using a a USB/ethernet adapter. This could be down to a lack of drivers for the particular adapter I was using or a lack of drivers for such adapters more generally.
+The necessary certificates for EAP based authentication methods are created as part of the build process.
+
+# Testing with a Rasberry Pi access point
+
+The following has been tested on a Raspberry Pi 4, which has built in Wifi as well as an ethernet port. It did not work on an original model Raspberry Pi, without ethernet port, using any of several USB/ethernet adapters. This could be down to a lack of drivers for the particular adapter a more general issue.
 
 Download the Raspberry Pi OS from [here](https://www.raspberrypi.org/software/operating-systems/)
 
-For this use-case we just need the 'Lite' image, without desktop environment or other tools.
+Choose the 'Lite' image, without desktop environment or other tools.
 
 ### Flashing the OS using a GUI
 
 The Raspberry Pi foundation provides [a tool for flashing the OS](https://www.raspberrypi.org/software/) and [a short video](https://www.youtube.com/watch?v=ntaXWS8Lk34&feature=youtu.be) explaining but if you prefer the terminal, follow the steps below.
 
-I haven't tested how well the GUI tool deals with SD cards with existing partitions. Many things do not. If your card doesn't work whe you try to boot from it then follow the steps under 'Re-using an SD card' below.
+If your card doesn't work whe you try to boot from it then follow the steps under 'Re-using an SD card' below.
 
 When you have flashed the card create an empty file called 'ssh' in the root of the boot partition, either through a desktop file manager or using the instructions below under 'Enabling ssh'.
 
@@ -104,13 +110,15 @@ When you have flashed the card create an empty file called 'ssh' in the root of 
 Extract the .img file from the zip and enter the directory containing it in the terminal.
 
 Enter `sudo blkid` to see a list of attached disks. Attach/insert an SD card to your machine and enter `sudo blkid` to see which device
-(whichever has newly appeared on the list) has been allocated to the SD card. In my case it was /dev/sdf.
+(whichever has newly appeared on the list) has been allocated to the SD card, e.g. /dev/sdf.
 
 #### Re-using an SD card
 
 dd doesn't always behave as expeced when using an SD card with multiple partitions, which any previously-used on a Raspberry Pi will have, so it's best to clear the card in advance.
 
-This can easily be done using a tool like Gparted. I haven't always found MacOS disk utility (or at least the recent versions) produce something usable when clearing multi-parition SD cards either but you may have more luck. It can be done on the command line as follows:
+This can easily be done using a tool like Gparted. The MacOS Disk Utility (or at least the recent versions) and several other GUI tools do not always produce something usable when clearing multi-parition SD cards.
+
+A multi-partition SD card can be cleared on the command line as follows:
 
 Assuming your SD card is /dev/sdf
 
@@ -201,7 +209,7 @@ Enter 'raspberry' when asked for the password.
 
 #### Basic housekeeping
 
-We should change the default password for the 'pi' user:
+Change the default password for the 'pi' user:
 
 ```
 passwd
@@ -281,8 +289,7 @@ Run the following command to initialise the bridge on boot:
 sudo systemctl enable systemd-networkd
 ```
 
-The Raspberry Pi's DHCP settings need changing to it requests an IP address from your home router for the bridge rather than its
-network devices. To edit the config:
+The Raspberry Pi's DHCP settings need changing so it requests an IP address from the connected router (see 'Requirements' above) for the bridge. To edit the config:
 
 ```
 sudo nano /etc/dhcpcd.conf
@@ -324,7 +331,7 @@ ssid=FREERADIUS_TESTING
 hw_mode=g
 channel=7
 macaddr_acl=0
-ieee8021x=1 
+ieee8021x=1
 nas_name=dockernet
 auth_server_addr=192.168.0.47
 auth_server_port=1812
@@ -343,5 +350,5 @@ Now, reboot the Raspberry Pi with:
 ```
 sudo reboot
 ```
-
+You should be able to connect to FreeRADIUS via the SSID 'FREERADIUS_TESTING'. If you are using the provided FreeRADIUS configuration, a variety of authentication methods will work using the username 'testing' and password 'password'.
 
